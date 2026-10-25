@@ -1,39 +1,56 @@
-type: vertical-stack
+# Sektion "Schulessen" für ein Sections-Dashboard (produktiv im Dashboard elternportal-test).
+type: grid
 cards:
-  - type: entities
-    title: Schulessen
-    entities:
-      - entity: sensor.cateringexpert_guthaben
-        name: Guthaben
-      - entity: sensor.cateringexpert_nachste_bestellfrist
-        name: Nächste Bestellfrist
-        format: relative
-      - entity: sensor.cateringexpert_bestellungen_nachste_woche
-        name: Bestellte Tage nächste Woche
-      - entity: binary_sensor.cateringexpert_portal_verbindung
-        name: Portal-Abruf
+  - type: heading
+    heading: Schulessen
+    heading_style: title
+    icon: mdi:silverware-fork-knife
+    badges:
+      - type: entity
+        entity: binary_sensor.cateringexpert_portal_verbindung
+        show_state: true
+        show_icon: true
+        tap_action:
+          action: url
+          url_path: https://essen.cateringexpert.de/
+  - type: tile
+    entity: sensor.cateringexpert_guthaben
+    name: Guthaben
+    grid_options:
+      columns: 6
+  - type: tile
+    entity: sensor.cateringexpert_nachste_bestellfrist
+    name: Nächste Frist
+    grid_options:
+      columns: 6
+  - type: heading
+    heading: Bestellungen nächste Woche
+    heading_style: subtitle
+    icon: mdi:food
   - type: markdown
-    title: Bestellungen nächste Woche
-    content: >-
-      {% set o = state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'students') or [] %}
-      {% set kw = state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'week') %}
-      {% if kw %}**KW {{ kw }}** · {{ '%.2f'|format(state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'total_price') or 0) }} €{% endif %}
-      {% for s in o %}
-
+    grid_options:
+      columns: full
+      rows: auto
+    content: |-
+      {% set e = 'sensor.cateringexpert_bestellungen_nachste_woche' %}{% set kw = state_attr(e, 'week') %}{% if kw %}**KW {{ kw }}** · {{ as_timestamp(state_attr(e,'monday')) | timestamp_custom('%d.%m.') }}–{{ as_timestamp(state_attr(e,'friday')) | timestamp_custom('%d.%m.') }} · {{ '%.2f' | format(state_attr(e,'total_price') or 0) | replace('.', ',') }} €
+      {% for s in state_attr(e, 'students') or [] %}{% if (state_attr(e, 'students') | count) > 1 %}
       **{{ s.name }}**
-      {% for d in s.days %}
-      - {{ d.weekday }} {{ as_timestamp(d.date) | timestamp_custom('%d.%m.') }}: {% if d.ordered %}{{ d.menu }}{% elif d.canceled %}_storniert_{% else %}–{% endif %}
-      {% endfor %}
-      {% else %}
-      Keine Daten.
-      {% endfor %}
+      {% endif %}
+      {% for d in s.days %}- **{{ d.weekday }} {{ as_timestamp(d.date) | timestamp_custom('%d.%m.') }}** {% if d.ordered %}🍽️ {{ d.menu }}{% elif d.canceled %}❌ _storniert_{% else %}– _nicht bestellt_{% endif %}
+      {% endfor %}{% endfor %}{% else %}Keine Daten.{% endif %}
+  - type: heading
+    heading: Bestellfristen
+    heading_style: subtitle
+    icon: mdi:calendar-clock
   - type: markdown
-    title: Bestellfristen
-    content: >-
-      {% set f = state_attr('sensor.cateringexpert_nachste_bestellfrist', 'weeks') or [] %}
-      {{ state_attr('sensor.cateringexpert_nachste_bestellfrist', 'rule') }}
+    grid_options:
+      columns: full
+      rows: auto
+    content: |-
+      {% set f = 'sensor.cateringexpert_nachste_bestellfrist' %}{% set wdn = ['Mo','Di','Mi','Do','Fr','Sa','So'] %}{% set nf = states(f) %}{% if nf not in ['unknown','unavailable'] %}{% set t = as_local(as_datetime(nf)) %}{% set left = t - now() %}{% set open = state_attr(f,'next_deadline_ordered_days') == 0 %}<ha-alert alert-type="{{ 'error' if open and left.total_seconds() < 172800 else ('warning' if open else 'success') }}" title="Bestellfrist KW {{ state_attr(f,'next_deadline_week') }}">{{ wdn[t.weekday()] }} {{ t.strftime('%d.%m. %H:%M') }} Uhr · {{ 'noch nichts bestellt' if open else 'bestellt' }}</ha-alert>{% endif %}
 
       | KW | Frist | Bestellt |
-      |:--|:--|:--|
-      {% for w in f %}| {{ w.week }} | {% if w.deadline %}{{ as_timestamp(w.deadline) | timestamp_custom('%a %d.%m. %H:%M') }}{% else %}–{% endif %}{% if w.expired %} (abgelaufen){% endif %} | {{ w.ordered_days }}/{{ w.possible_days }} |
+      |:--|:--|:-:|
+      {% for w in state_attr(f, 'weeks') or [] %}{% set t = as_local(as_datetime(w.deadline)) %}| {{ w.week }} | {{ wdn[t.weekday()] }} {{ t.strftime('%d.%m. %H:%M') }}{{ ' · abgelaufen' if w.expired else '' }} | {{ w.ordered_days }}/{{ w.possible_days }} |
       {% endfor %}
+      _{{ state_attr(f, 'rule') }}_

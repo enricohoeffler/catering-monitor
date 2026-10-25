@@ -1,19 +1,38 @@
-# Beispiel: Erinnerung 24 Stunden vor der nächsten Bestellfrist, wenn für die betroffene Woche noch nichts bestellt ist.
-# notify-Ziel vor dem Anlegen anpassen.
+# Erinnerung 24 Stunden vor der nächsten Bestellfrist, wenn für die betroffene Woche noch nichts bestellt ist.
+# Produktiv angelegt als automation.schulessen_bestellfrist_erinnerung; notify-Ziele bei Bedarf anpassen.
 alias: Schulessen – Bestellfrist-Erinnerung
 mode: single
 triggers:
-  - trigger: template
-    value_template: >-
-      {% set f = states('sensor.cateringexpert_nachste_bestellfrist') %}
-      {{ f not in ['unknown', 'unavailable'] and now() >= as_datetime(f) - timedelta(hours=24) }}
+  - trigger: time
+    at:
+      entity_id: sensor.cateringexpert_nachste_bestellfrist
+      offset: "-24:00:00"
 conditions:
-  - condition: template
-    value_template: "{{ (state_attr('sensor.cateringexpert_nachste_bestellfrist', 'next_deadline_ordered_days') or 0) == 0 }}"
+  - condition: state
+    entity_id: binary_sensor.cateringexpert_portal_verbindung
+    state: "on"
+  - condition: numeric_state
+    entity_id: sensor.cateringexpert_nachste_bestellfrist
+    attribute: next_deadline_ordered_days
+    below: 1
 actions:
-  - action: notify.mobile_app_CHANGE_ME
-    data:
+  - variables:
       title: Schulessen bestellen
       message: >-
-        Für KW {{ state_attr('sensor.cateringexpert_nachste_bestellfrist', 'next_deadline_week') }} ist noch nichts bestellt.
-        Frist: {{ as_timestamp(states('sensor.cateringexpert_nachste_bestellfrist')) | timestamp_custom('%a %d.%m. %H:%M') }} Uhr.
+        Für KW {{ state_attr('sensor.cateringexpert_nachste_bestellfrist', 'next_deadline_week') }} ist noch kein Essen bestellt.
+        Frist: {{ as_timestamp(states('sensor.cateringexpert_nachste_bestellfrist')) | timestamp_custom('%d.%m. um %H:%M') }} Uhr.
+  - action: notify.mobile_app_sm_a556b
+    data:
+      title: "{{ title }}"
+      message: "{{ message }}"
+      data:
+        url: https://essen.cateringexpert.de/
+        clickAction: https://essen.cateringexpert.de/
+        tag: cateringexpert-bestellfrist
+  - action: notify.mobile_app_carolin_iphone
+    data:
+      title: "{{ title }}"
+      message: "{{ message }}"
+      data:
+        url: https://essen.cateringexpert.de/
+        tag: cateringexpert-bestellfrist
