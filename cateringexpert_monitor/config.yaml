@@ -2,7 +2,7 @@ name: Cateringexpert Monitor
 version: "0.1.0"
 slug: cateringexpert_monitor
 description: Liest Schulessen-Bestellungen, Guthaben und Bestellfristen aus Cateringexpert und stellt sie Home Assistant per MQTT bereit.
-url: https://github.com/enricohoeffler/cateringexpert-monitor
+url: https://github.com/enricohoeffler/catering-monitor
 startup: application
 boot: auto
 init: false
