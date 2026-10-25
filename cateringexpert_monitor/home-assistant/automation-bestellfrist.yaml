@@ -1,0 +1,19 @@
+# Beispiel: Erinnerung 24 Stunden vor der nächsten Bestellfrist, wenn für die betroffene Woche noch nichts bestellt ist.
+# notify-Ziel vor dem Anlegen anpassen.
+alias: Schulessen – Bestellfrist-Erinnerung
+mode: single
+triggers:
+  - trigger: template
+    value_template: >-
+      {% set f = states('sensor.cateringexpert_nachste_bestellfrist') %}
+      {{ f not in ['unknown', 'unavailable'] and now() >= as_datetime(f) - timedelta(hours=24) }}
+conditions:
+  - condition: template
+    value_template: "{{ (state_attr('sensor.cateringexpert_nachste_bestellfrist', 'next_deadline_ordered_days') or 0) == 0 }}"
+actions:
+  - action: notify.mobile_app_CHANGE_ME
+    data:
+      title: Schulessen bestellen
+      message: >-
+        Für KW {{ state_attr('sensor.cateringexpert_nachste_bestellfrist', 'next_deadline_week') }} ist noch nichts bestellt.
+        Frist: {{ as_timestamp(states('sensor.cateringexpert_nachste_bestellfrist')) | timestamp_custom('%a %d.%m. %H:%M') }} Uhr.

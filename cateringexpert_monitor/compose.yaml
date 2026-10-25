@@ -1,0 +1,9 @@
+services:
+  cateringexpert-monitor:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MODE: daemon

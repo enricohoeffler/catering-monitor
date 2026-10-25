@@ -1,0 +1,39 @@
+type: vertical-stack
+cards:
+  - type: entities
+    title: Schulessen
+    entities:
+      - entity: sensor.cateringexpert_guthaben
+        name: Guthaben
+      - entity: sensor.cateringexpert_nachste_bestellfrist
+        name: Nächste Bestellfrist
+        format: relative
+      - entity: sensor.cateringexpert_bestellungen_nachste_woche
+        name: Bestellte Tage nächste Woche
+      - entity: binary_sensor.cateringexpert_portal_verbindung
+        name: Portal-Abruf
+  - type: markdown
+    title: Bestellungen nächste Woche
+    content: >-
+      {% set o = state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'students') or [] %}
+      {% set kw = state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'week') %}
+      {% if kw %}**KW {{ kw }}** · {{ '%.2f'|format(state_attr('sensor.cateringexpert_bestellungen_nachste_woche', 'total_price') or 0) }} €{% endif %}
+      {% for s in o %}
+
+      **{{ s.name }}**
+      {% for d in s.days %}
+      - {{ d.weekday }} {{ as_timestamp(d.date) | timestamp_custom('%d.%m.') }}: {% if d.ordered %}{{ d.menu }}{% elif d.canceled %}_storniert_{% else %}–{% endif %}
+      {% endfor %}
+      {% else %}
+      Keine Daten.
+      {% endfor %}
+  - type: markdown
+    title: Bestellfristen
+    content: >-
+      {% set f = state_attr('sensor.cateringexpert_nachste_bestellfrist', 'weeks') or [] %}
+      {{ state_attr('sensor.cateringexpert_nachste_bestellfrist', 'rule') }}
+
+      | KW | Frist | Bestellt |
+      |:--|:--|:--|
+      {% for w in f %}| {{ w.week }} | {% if w.deadline %}{{ as_timestamp(w.deadline) | timestamp_custom('%a %d.%m. %H:%M') }}{% else %}–{% endif %}{% if w.expired %} (abgelaufen){% endif %} | {{ w.ordered_days }}/{{ w.possible_days }} |
+      {% endfor %}

@@ -1,0 +1,20 @@
+configuration:
+  portal_base_url:
+    name: Portal-Adresse
+    description: Basisadresse des Cateringexpert-Portals.
+  email:
+    name: E-Mail-Adresse
+    description: Anmelde-E-Mail des Cateringexpert-Kontos.
+  password:
+    name: Passwort
+    description: Passwort des Cateringexpert-Kontos.
+  poll_interval_minutes:
+    name: Abrufintervall
+    description: Zeit zwischen zwei Abrufen in Minuten (mindestens 15).
+  weeks_ahead:
+    name: Wochen voraus
+    description: Anzahl der kommenden Bestellwochen ab nächster Woche, für die Fristen und Bestellstand ermittelt werden.
+  mqtt_discovery_prefix:
+    name: MQTT-Discovery-Präfix
+  mqtt_base_topic:
+    name: MQTT-Basistopic
