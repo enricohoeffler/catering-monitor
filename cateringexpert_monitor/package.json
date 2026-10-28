@@ -1,6 +1,6 @@
 {
   "name": "cateringexpert-monitor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Read-only monitor for Cateringexpert school meal orders, balance and order deadlines",

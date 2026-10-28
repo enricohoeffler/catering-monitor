@@ -5,7 +5,7 @@ import {
   PortalResponseError,
   ReadOnlyPolicyError,
 } from "./errors.js";
-import { addDays, dayDeadline, parseDeadlineRule, upcomingWeeks, WEEKDAY_LABELS } from "./deadlines.js";
+import { addDays, currentWeek, dayDeadline, parseDeadlineRule, upcomingWeeks, WEEKDAY_LABELS } from "./deadlines.js";
 
 // Die API kennt auch Bestell-, Storno-, Überweisungs- und Auszahlungsendpunkte.
 // Deshalb sind ausschließlich die folgenden Pfade erlaubt.
@@ -179,22 +179,28 @@ export class CateringexpertClient {
     const { deadlineRule } = parseCustomer(await this.getJson("/api/getCustomerInfo"));
     const balance = parseBalance(await this.getJson("/api/getAccountTenant"));
 
+    const runningWeek = currentWeek(now);
+    const thisWeek = { ...runningWeek, students: await this.readWeekOrders(runningWeek, students) };
     const weeks = [];
     for (const week of upcomingWeeks(now, weeksAhead)) {
-      const studentOrders = [];
-      for (const student of students) {
-        const raw = await this.getJson("/api/getOrderStudentWeek", { mondayDate: week.monday, studentId: student.id });
-        studentOrders.push({ studentId: student.id, firstName: student.firstName, days: parseWeekOrders(raw, week.monday) });
-      }
       const dayDeadlines = deadlineRule ? WEEKDAY_LABELS.map((_label, index) => dayDeadline(deadlineRule, addDays(week.monday, index))) : [];
       weeks.push({
         ...week,
         deadline: dayDeadlines[0] ?? null,
         deadlineLast: dayDeadlines.at(-1) ?? null,
         dayDeadlines,
-        students: studentOrders,
+        students: await this.readWeekOrders(week, students),
       });
     }
-    return { balance, deadlineRule, students, weeks };
+    return { balance, deadlineRule, students, thisWeek, weeks };
+  }
+
+  async readWeekOrders(week, students) {
+    const studentOrders = [];
+    for (const student of students) {
+      const raw = await this.getJson("/api/getOrderStudentWeek", { mondayDate: week.monday, studentId: student.id });
+      studentOrders.push({ studentId: student.id, firstName: student.firstName, days: parseWeekOrders(raw, week.monday) });
+    }
+    return studentOrders;
   }
 }

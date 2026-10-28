@@ -40,16 +40,19 @@ function connectAsync(client) {
 
 export function buildMqttPayloads(data, checkedAt, now = new Date(checkedAt)) {
   const orders = buildWeekOrders(data.weeks[0]);
+  const ordersThisWeek = buildWeekOrders(data.thisWeek);
   const deadlines = buildDeadlines(data, now);
   return {
     state: {
       last_checked: checkedAt,
       balance: data.balance,
+      this_week_ordered_days: ordersThisWeek.ordered_days,
       next_week_ordered_days: orders.ordered_days,
       next_deadline: deadlines.next_deadline,
     },
     attributes: {
       orders,
+      orders_this_week: ordersThisWeek,
       deadlines,
     },
   };
@@ -95,6 +98,7 @@ export class MqttPublisher {
     const entities = [
       ["binary_sensor", "portal_connection", { name: "Portal-Verbindung", unique_id: "cateringexpert_portal_connection", state_topic: healthTopic, value_template: "{{ 'ON' if value_json.portal_ok else 'OFF' }}", payload_on: "ON", payload_off: "OFF", device_class: "connectivity", json_attributes_topic: healthTopic }],
       ["sensor", "balance", { name: "Guthaben", unique_id: "cateringexpert_balance", state_topic: stateTopic, value_template: "{{ value_json.balance }}", device_class: "monetary", unit_of_measurement: "EUR", suggested_display_precision: 2, icon: "mdi:wallet" }],
+      ["sensor", "this_week_orders", { name: "Bestellungen diese Woche", unique_id: "cateringexpert_this_week_orders", state_topic: stateTopic, value_template: "{{ value_json.this_week_ordered_days }}", unit_of_measurement: "Tage", icon: "mdi:food-outline", json_attributes_topic: `${base}/attributes/orders_this_week` }],
       ["sensor", "next_week_orders", { name: "Bestellungen nächste Woche", unique_id: "cateringexpert_next_week_orders", state_topic: stateTopic, value_template: "{{ value_json.next_week_ordered_days }}", unit_of_measurement: "Tage", icon: "mdi:food", json_attributes_topic: `${base}/attributes/orders` }],
       ["sensor", "next_deadline", { name: "Nächste Bestellfrist", unique_id: "cateringexpert_next_deadline", state_topic: stateTopic, value_template: "{{ value_json.next_deadline }}", device_class: "timestamp", icon: "mdi:calendar-clock", json_attributes_topic: `${base}/attributes/deadlines` }],
       ["sensor", "last_update", { name: "Letzter Abruf", unique_id: "cateringexpert_last_update", state_topic: stateTopic, value_template: "{{ value_json.last_checked }}", device_class: "timestamp", icon: "mdi:clock-check" }],

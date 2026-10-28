@@ -121,11 +121,17 @@ export function dayDeadline(rule, value) {
   return zonedToUtc(deadlineDay, rule.time);
 }
 
+function weekFrom(monday) {
+  return { monday, friday: addDays(monday, 4), ...isoWeek(monday) };
+}
+
+// Laufende Kalenderwoche (Europe/Berlin).
+export function currentWeek(now) {
+  return weekFrom(isoMonday(localDate(now)));
+}
+
 // Kommende Bestellwochen, beginnend mit der nächsten Kalenderwoche.
 export function upcomingWeeks(now, count) {
   const nextMonday = addDays(isoMonday(localDate(now)), 7);
-  return Array.from({ length: count }, (_value, index) => {
-    const monday = addDays(nextMonday, 7 * index);
-    return { monday, friday: addDays(monday, 4), ...isoWeek(monday) };
-  });
+  return Array.from({ length: count }, (_value, index) => weekFrom(addDays(nextMonday, 7 * index)));
 }

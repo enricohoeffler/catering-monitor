@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dayDeadline, describeDeadlineRule, isoWeek, parseDeadlineRule, upcomingWeeks, zonedToUtc } from "../src/deadlines.js";
+import { currentWeek, dayDeadline, describeDeadlineRule, isoWeek, parseDeadlineRule, upcomingWeeks, zonedToUtc } from "../src/deadlines.js";
 
 test("Ortszeit Berlin wird sommerzeitfest umgerechnet", () => {
   assert.equal(zonedToUtc("2026-10-23", "12:00").toISOString(), "2026-10-23T10:00:00.000Z");
@@ -40,4 +40,11 @@ test("ungültige Fristeinstellungen ergeben keine Regel", () => {
   assert.equal(parseDeadlineRule(null), null);
   assert.equal(parseDeadlineRule({ isDeadlineDaily: false, deadlineWeekly: { weeks: 1, day: 4, time: "25:00" } }), null);
   assert.equal(describeDeadlineRule(null), "Keine Bestellfrist hinterlegt");
+});
+
+test("laufende Woche beginnt am Montag dieser Woche", () => {
+  assert.equal(currentWeek(new Date("2026-10-28T18:00:00Z")).monday, "2026-10-26");
+  assert.equal(currentWeek(new Date("2026-11-01T22:30:00Z")).monday, "2026-10-26");
+  assert.equal(currentWeek(new Date("2026-11-01T23:30:00Z")).monday, "2026-11-02");
+  assert.equal(currentWeek(new Date("2026-10-25T10:00:00Z")).week, 43);
 });

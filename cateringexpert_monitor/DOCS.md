@@ -17,6 +17,7 @@ Die App bestellt, storniert und überweist nichts. Eine zentrale Allowlist läss
 
 - **Portal-Verbindung** (`binary_sensor.cateringexpert_portal_verbindung`)
 - **Guthaben** (`sensor.cateringexpert_guthaben`) in EUR
+- **Bestellungen diese Woche** (`sensor.cateringexpert_bestellungen_diese_woche`): wie unten, für die laufende Kalenderwoche
 - **Bestellungen nächste Woche** (`sensor.cateringexpert_bestellungen_nachste_woche`): Anzahl bestellter Essenstage; Attribute mit Kalenderwoche, Gesamtpreis und je Kind den Tagen samt Menü
 - **Nächste Bestellfrist** (`sensor.cateringexpert_nachste_bestellfrist`): Zeitpunkt der nächsten noch offenen Frist; Attribute mit Fristregel, bereits bestellten Tagen der betroffenen Woche und einer Liste der kommenden Wochen
 - **Letzter Abruf** (`sensor.cateringexpert_letzter_abruf`)

@@ -75,6 +75,7 @@ test("MQTT-Nutzlast enthält Guthaben, Wochenbestellung und nächste offene Fris
   const days = parseWeekOrders([{ order: { orderMenus: [{ nameOrder: "Menü 1", amountOrder: 1, priceOrder: 4.2 }] } }, null, null, null, null], "2026-10-26");
   const data = {
     balance: 23.4,
+    thisWeek: { monday: "2026-10-19", friday: "2026-10-23", week: 43, year: 2026, students: [{ studentId: "s1", firstName: "Kind", days: parseWeekOrders([null, null, { order: { orderMenus: [{ nameOrder: "Menü 2", amountOrder: 1, priceOrder: 4.2 }] } }], "2026-10-19") }] },
     deadlineRule: { mode: "weekly", weeks: 1, weekday: 4, time: "12:00" },
     students: [{ id: "s1", firstName: "Kind" }],
     weeks: [
@@ -85,6 +86,9 @@ test("MQTT-Nutzlast enthält Guthaben, Wochenbestellung und nächste offene Fris
   const payloads = buildMqttPayloads(data, "2026-10-25T10:00:00.000Z");
   assert.equal(payloads.state.balance, 23.4);
   assert.equal(payloads.state.next_week_ordered_days, 1);
+  assert.equal(payloads.state.this_week_ordered_days, 1);
+  assert.equal(payloads.attributes.orders_this_week.week, 43);
+  assert.equal(payloads.attributes.orders_this_week.students[0].days[2].menu, "Menü 2");
   assert.equal(payloads.state.next_deadline, "2026-10-29T11:00:00.000Z");
   assert.equal(payloads.attributes.orders.total_price, 4.2);
   assert.equal(payloads.attributes.orders.students[0].days[0].menu, "Menü 1");

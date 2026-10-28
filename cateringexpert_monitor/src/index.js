@@ -9,7 +9,7 @@ async function runOnce(config, mqttPublisher) {
   const checkedAt = now.toISOString();
   await mqttPublisher.publishSnapshot(data, checkedAt);
   const { state } = buildMqttPayloads(data, checkedAt, now);
-  console.log(`[${checkedAt}] Erfolgreich: ${data.students.length} Kind(er), ${state.next_week_ordered_days} bestellte Tage nächste Woche, Guthaben ${state.balance === null ? "unbekannt" : "abgerufen"}, nächste Frist ${state.next_deadline ?? "keine"}.`);
+  console.log(`[${checkedAt}] Erfolgreich: ${data.students.length} Kind(er), ${state.this_week_ordered_days} bestellte Tage diese Woche, ${state.next_week_ordered_days} nächste Woche, Guthaben ${state.balance === null ? "unbekannt" : "abgerufen"}, nächste Frist ${state.next_deadline ?? "keine"}.`);
 }
 
 async function main() {
