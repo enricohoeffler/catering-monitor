@@ -36,6 +36,7 @@ export function buildWeekOrders(week) {
         weekday: day.weekday,
         ordered: day.ordered,
         canceled: day.canceled,
+        holiday: Boolean(day.holiday),
         menu: day.items.map((item) => (item.amount > 1 ? `${item.amount}× ${item.name}` : item.name)).join(", "),
         price: roundMoney(dayPrice(day)),
       })),
@@ -51,18 +52,22 @@ export function buildDeadlines(data, now) {
     deadline: iso(week.deadline),
     deadline_last: iso(week.deadlineLast),
     expired: week.deadlineLast ? week.deadlineLast <= now : false,
+    holiday: Boolean(week.holiday),
+    holiday_days: week.holidayDates?.length ?? 0,
     ordered_days: orderedDayCount(week),
-    possible_days: week.students.length * 5,
+    possible_days: week.students.length * (5 - (week.holidayDates?.length ?? 0)),
   }));
-  // Nächste noch offene Frist: bei Tagesfristen zählt der früheste noch nicht abgelaufene Essenstag.
-  const next = data.weeks.find((week) => week.deadlineLast && week.deadlineLast > now);
-  const nextDeadline = next ? next.dayDeadlines.find((deadline) => deadline > now) : null;
+  // Nächste noch offene Frist: Ferientage zählen nicht; bei Tagesfristen zählt der früheste offene Essenstag.
+  const open = (week) => week.openDeadlines ?? week.dayDeadlines ?? [];
+  const next = data.weeks.find((week) => open(week).some((deadline) => deadline > now));
+  const nextDeadline = next ? open(next).find((deadline) => deadline > now) : null;
   return {
     rule: describeDeadlineRule(data.deadlineRule),
     next_deadline: iso(nextDeadline),
     next_deadline_week: next ? next.week : null,
     next_deadline_monday: next ? next.monday : null,
     next_deadline_ordered_days: next ? orderedDayCount(next) : null,
+    holiday_sources: data.holidaySources ?? [],
     weeks,
   };
 }

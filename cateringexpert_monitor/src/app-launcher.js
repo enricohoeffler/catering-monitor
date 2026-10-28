@@ -8,6 +8,7 @@ try {
     password: "CATERINGEXPERT_PASSWORD",
     poll_interval_minutes: "POLL_INTERVAL_MINUTES",
     weeks_ahead: "WEEKS_AHEAD",
+    holiday_calendar: "HOLIDAY_CALENDAR",
     mqtt_discovery_prefix: "MQTT_DISCOVERY_PREFIX",
     mqtt_base_topic: "MQTT_BASE_TOPIC",
   };

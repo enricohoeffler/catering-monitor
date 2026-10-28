@@ -1,5 +1,5 @@
 name: Cateringexpert Monitor
-version: "0.2.0"
+version: "0.3.0"
 slug: cateringexpert_monitor
 description: Liest Schulessen-Bestellungen, Guthaben und Bestellfristen aus Cateringexpert und stellt sie Home Assistant per MQTT bereit.
 url: https://github.com/enricohoeffler/catering-monitor
@@ -9,6 +9,7 @@ init: false
 arch:
   - amd64
   - aarch64
+homeassistant_api: true
 services:
   - mqtt:need
 options:
@@ -17,6 +18,7 @@ options:
   password: ""
   poll_interval_minutes: 120
   weeks_ahead: 3
+  holiday_calendar: calendar.ferien_bayern_2
   mqtt_discovery_prefix: homeassistant
   mqtt_base_topic: cateringexpert
 schema:
@@ -25,5 +27,6 @@ schema:
   password: password
   poll_interval_minutes: int(15,1440)
   weeks_ahead: int(1,8)
+  holiday_calendar: str?
   mqtt_discovery_prefix: str
   mqtt_base_topic: str

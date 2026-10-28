@@ -6,6 +6,7 @@ import {
   ReadOnlyPolicyError,
 } from "./errors.js";
 import { addDays, currentWeek, dayDeadline, parseDeadlineRule, upcomingWeeks, WEEKDAY_LABELS } from "./deadlines.js";
+import { parsePortalVacations } from "./holidays.js";
 
 // Die API kennt auch Bestell-, Storno-, Überweisungs- und Auszahlungsendpunkte.
 // Deshalb sind ausschließlich die folgenden Pfade erlaubt.
@@ -15,6 +16,7 @@ const ALLOWED_GET_PATHS = new Set([
   "/api/getcustomerinfo",
   "/api/getaccounttenant",
   "/api/getorderstudentweek",
+  "/api/getvacationcustomer",
 ]);
 const ALLOWED_POST_PATHS = new Set([
   "/api/authenticate",
@@ -178,6 +180,7 @@ export class CateringexpertClient {
     const students = parseStudents(await this.getJson("/api/getRegisteredStudentsUser"));
     const { deadlineRule } = parseCustomer(await this.getJson("/api/getCustomerInfo"));
     const balance = parseBalance(await this.getJson("/api/getAccountTenant"));
+    const vacations = parsePortalVacations(await this.getJson("/api/getVacationCustomer"));
 
     const runningWeek = currentWeek(now);
     const thisWeek = { ...runningWeek, students: await this.readWeekOrders(runningWeek, students) };
@@ -192,7 +195,7 @@ export class CateringexpertClient {
         students: await this.readWeekOrders(week, students),
       });
     }
-    return { balance, deadlineRule, students, thisWeek, weeks };
+    return { balance, deadlineRule, students, thisWeek, weeks, vacations };
   }
 
   async readWeekOrders(week, students) {

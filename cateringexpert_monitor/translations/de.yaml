@@ -14,6 +14,9 @@ configuration:
   weeks_ahead:
     name: Wochen voraus
     description: Anzahl der kommenden Bestellwochen ab nächster Woche, für die Fristen und Bestellstand ermittelt werden.
+  holiday_calendar:
+    name: Ferienkalender
+    description: Optionale Home-Assistant-Kalenderentität mit Schulferien (z. B. calendar.ferien_bayern_2). Ergänzt die Ferienzeiten aus dem Portal; leer lassen zum Abschalten.
   mqtt_discovery_prefix:
     name: MQTT-Discovery-Präfix
   mqtt_base_topic:
