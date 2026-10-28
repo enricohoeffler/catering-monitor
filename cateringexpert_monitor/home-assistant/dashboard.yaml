@@ -51,6 +51,6 @@ cards:
 
       | KW | Frist | Bestellt |
       |:--|:--|:-:|
-      {% for w in state_attr(f, 'weeks') or [] %}{% set t = as_local(as_datetime(w.deadline)) %}| {{ w.week }} | {{ wdn[t.weekday()] }} {{ t.strftime('%d.%m. %H:%M') }}{{ ' · abgelaufen' if w.expired else '' }} | {{ w.ordered_days }}/{{ w.possible_days }} |
+      {% for w in state_attr(f, 'weeks') or [] %}{% set t = as_local(as_datetime(w.deadline)) %}| {{ w.week }} | {{ wdn[t.weekday()] }} {{ t.strftime('%d.%m. %H:%M') }}{{ ' · abgelaufen' if w.expired else '' }}{{ ' · Ferien' if w.holiday else '' }} | {{ w.ordered_days }}/{{ w.possible_days }} |
       {% endfor %}
       _{{ state_attr(f, 'rule') }}_
